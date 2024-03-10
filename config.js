@@ -1,14 +1,15 @@
 const firebase = require("firebase");
 const firebaseConfig = {
-  apiKey: "AIzaSyACYJ5Cm2Y-i7HJes2ET2QW67zvIgLrZeo",
-  authDomain: "tutorial-e06c1.firebaseapp.com",
-  projectId: "tutorial-e06c1",
-  storageBucket: "tutorial-e06c1.appspot.com",
-  messagingSenderId: "863505404334",
-  appId: "1:863505404334:web:132118b0d6acd7dfa3f83f",
-  measurementId: "G-SW2M0FYQG5",
+  apiKey: "AIzaSyAVNxI5GK0AERtBAzKZYgNZDoZ0RVvaIOc",
+  authDomain: "confession-app-5fde4.firebaseapp.com",
+  databaseURL: "https://confession-app-5fde4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "confession-app-5fde4",
+  storageBucket: "confession-app-5fde4.appspot.com",
+  messagingSenderId: "347249653684",
+  appId: "1:347249653684:web:293b7c9da3d6a8ecdaa4e1",
+  measurementId: "G-BQ43XSFL6Y"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const User = db.collection("Users");
+const User = db.collection("users");
 module.exports = User;
