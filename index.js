@@ -19,10 +19,10 @@ app.get("/", async (req, res) => {
       // Check if 'userslist' field exists and is an array
       if (userData && userData.userslist && Array.isArray(userData.userslist)) {
         const usersList = userData.userslist;
-        const emailList = jsonResponse.map(item => item.email);
+        const emailList = usersList.map(item => item.email);
 
-        console.log('Users List:', usersList);
-        res.send(usersList);
+        console.log('Users List:', emailList);
+        res.send(emailList);
       } else {
         res.status(500).send('The document does not contain a valid "userslist" field.');
       }
