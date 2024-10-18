@@ -1,58 +1,37 @@
 const express = require("express");
 const cors = require("cors");
-const User = require("./config");
+const User = require("./config"); // Make sure this imports your Firestore configuration
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
-app.get("/", async (req, res) => {
+// Endpoint to fetch all users from the "users" collection
+app.get("/users", async (req, res) => {
   try {
-    // Reference to Firestore document
-    const docRef = User.doc('usersdoc');
+    // Fetch all documents in the users collection
+    const snapshot = await User.get();
 
-    // Get the document data
-    const docSnapshot = await docRef.get();
+    // Check if the collection has documents
+    if (!snapshot.empty) {
+      const usersList = [];
+      snapshot.forEach(doc => {
+        usersList.push({ id: doc.id, ...doc.data() }); // Include document ID and data
+      });
 
-    if (docSnapshot.exists) {
-      const userData = docSnapshot.data();
-
-      // Check if 'userslist' field exists and is an array
-      if (userData && userData.userslist && Array.isArray(userData.userslist)) {
-        const usersList = userData.userslist;
-        const emailList = usersList.map(item => item.email);
-
-        console.log('Users List:', emailList);
-        res.send(emailList);
-      } else {
-        res.status(500).send('The document does not contain a valid "userslist" field.');
-      }
+      console.log('Users List:', usersList);
+      res.json(usersList); // Send usersList as JSON
     } else {
-      res.status(404).send('Document not found');
+      res.status(404).json({ message: 'No users found' }); // Return JSON for no users found
     }
   } catch (error) {
-    console.error('Error getting document:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('Error getting users:', error);
+    res.status(500).json({ message: 'Internal Server Error' }); // Return JSON for error
   }
 });
 
-// app.post("/create", async (req, res) => {
-//   const data = req.body;
-//   await User.add({ data });
-//   res.send({ msg: "User Added" });
-// });
-
-// app.post("/update", async (req, res) => {
-//   const id = req.body.id;
-//   delete req.body.id;
-//   const data = req.body;
-//   await User.doc(id).update(data);
-//   res.send({ msg: "Updated" });
-// });
-
-// app.post("/delete", async (req, res) => {
-//   const id = req.body.id;
-//   await User.doc(id).delete();
-//   res.send({ msg: "Deleted" });
-// });
-
-app.listen(4000, () => console.log("Up & RUnning *4000"));
+// Start the server
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
