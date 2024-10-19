@@ -1,37 +1,48 @@
-const express = require("express");
-const cors = require("cors");
-const User = require("./config"); // Make sure this imports your Firestore configuration
+const express = require('express');
 const app = express();
 
+// Middleware to parse JSON request body
 app.use(express.json());
-app.use(cors());
 
-// Endpoint to fetch all users from the "users" collection
-app.get("/users", async (req, res) => {
-  try {
-    // Fetch all documents in the users collection
-    const snapshot = await User.get();
+// Function to determine heart rate status
+function getHeartRateStatus(age, heartRate) {
+    let normalRange = {};
 
-    // Check if the collection has documents
-    if (!snapshot.empty) {
-      const usersList = [];
-      snapshot.forEach(doc => {
-        usersList.push({ id: doc.id, ...doc.data() }); // Include document ID and data
-      });
-
-      console.log('Users List:', usersList);
-      res.json(usersList); // Send usersList as JSON
+    // Normal resting heart rate ranges based on age group
+    if (age < 1) {
+        normalRange = { min: 100, max: 160 }; // Infant
+    } else if (age >= 1 && age <= 10) {
+        normalRange = { min: 70, max: 120 }; // Children
+    } else if (age > 10 && age <= 18) {
+        normalRange = { min: 60, max: 100 }; // Teens
+    } else if (age > 18 && age <= 60) {
+        normalRange = { min: 60, max: 100 }; // Adults
     } else {
-      res.status(404).json({ message: 'No users found' }); // Return JSON for no users found
+        normalRange = { min: 60, max: 100 }; // Seniors
     }
-  } catch (error) {
-    console.error('Error getting users:', error);
-    res.status(500).json({ message: 'Internal Server Error' }); // Return JSON for error
-  }
+
+    if (heartRate < normalRange.min || heartRate > normalRange.max) {
+        return "critical";
+    } else {
+        return "normal";
+    }
+}
+
+// API endpoint to take age and heart rate and return status
+app.post('/check-heart-rate', (req, res) => {
+    const { age, heartRate } = req.body;
+
+    // Input validation
+    if (!age || !heartRate) {
+        return res.status(400).json({ error: 'Please provide both age and heart rate' });
+    }
+
+    const status = getHeartRateStatus(age, heartRate);
+    res.json({ status: status });
 });
 
 // Start the server
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
